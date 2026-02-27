@@ -1,0 +1,305 @@
+--// LiquidUI Library
+local LiquidUI = {}
+LiquidUI.__index = LiquidUI
+
+--// SERVICES
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+---------------------------------------------------
+-- CLEANUP OLD
+---------------------------------------------------
+
+if playerGui:FindFirstChild("LiquidUI") then
+	playerGui.LiquidUI:Destroy()
+end
+
+if playerGui:FindFirstChild("DynamicIslandGui") then
+	playerGui.DynamicIslandGui:Destroy()
+end
+
+---------------------------------------------------
+-- SCALE
+---------------------------------------------------
+
+local SCALE = 1.5
+local function S(v)
+	return math.floor(v / SCALE)
+end
+
+---------------------------------------------------
+-- FONT
+---------------------------------------------------
+
+local InterFont = Font.new("rbxassetid://12187365364")
+
+---------------------------------------------------
+-- STROKE
+---------------------------------------------------
+
+local function addStroke(frame, thickness, transparency)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(255,255,255)
+	stroke.Transparency = transparency or 0.4
+	stroke.Thickness = thickness or 1.5
+	stroke.Parent = frame
+	return stroke
+end
+
+---------------------------------------------------
+-- WINDOW
+---------------------------------------------------
+
+function LiquidUI:CreateWindow(titleText, versionText)
+	local Window = {}
+	Window.Tabs = {}
+	
+	-- Blur
+	local blur = Lighting:FindFirstChild("LiquidBlur")
+	if not blur then
+		blur = Instance.new("BlurEffect")
+		blur.Name = "LiquidBlur"
+		blur.Size = 0
+		blur.Parent = Lighting
+	end
+	
+	-- Gui
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "LiquidUI"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.Parent = playerGui
+	
+	-- Sizes
+	local HEIGHT = S(720)
+	local LEFT_WIDTH = S(250)
+	local OWNER_WIDTH = S(1000)
+	local GAP = S(25)
+	local INNER_GAP = S(15)
+	local LEFT_TOP_HEIGHT = S(120)
+	local TOTAL_WIDTH = LEFT_WIDTH + GAP + OWNER_WIDTH
+	
+	-- Holder
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(0, TOTAL_WIDTH, 0, HEIGHT)
+	holder.Position = UDim2.new(0.5, 0, 0.5, 0)
+	holder.AnchorPoint = Vector2.new(0.5, 0.5)
+	holder.BackgroundTransparency = 1
+	holder.Parent = gui
+	holder.Visible = false
+	
+	local uiScale = Instance.new("UIScale")
+	uiScale.Scale = 0
+	uiScale.Parent = holder
+	
+	---------------------------------------------------
+	-- LEFT TOP
+	---------------------------------------------------
+	
+	local leftTop = Instance.new("Frame")
+	leftTop.Size = UDim2.new(0, LEFT_WIDTH, 0, LEFT_TOP_HEIGHT)
+	leftTop.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	leftTop.BackgroundTransparency = 0.75
+	leftTop.Parent = holder
+	Instance.new("UICorner", leftTop).CornerRadius = UDim.new(0, S(45))
+	addStroke(leftTop)
+	
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0.6, 0)
+	title.Position = UDim2.new(0, 0, 0.1, 0)
+	title.BackgroundTransparency = 1
+	title.Text = titleText
+	title.TextColor3 = Color3.fromRGB(255,255,255)
+	title.TextScaled = true
+	title.FontFace = InterFont
+	title.Parent = leftTop
+	
+	local version = Instance.new("TextLabel")
+	version.Size = UDim2.new(1, 0, 0.4, 0)
+	version.Position = UDim2.new(0, 0, 0.55, 0)
+	version.BackgroundTransparency = 1
+	version.Text = versionText
+	version.TextColor3 = Color3.fromRGB(255,255,255)
+	version.TextTransparency = 0.3
+	version.TextScaled = true
+	version.FontFace = InterFont
+	version.Parent = leftTop
+	
+	---------------------------------------------------
+	-- LEFT BOTTOM (TABS)
+	---------------------------------------------------
+	
+	local leftBottom = Instance.new("Frame")
+	leftBottom.Size = UDim2.new(0, LEFT_WIDTH, 0, HEIGHT - LEFT_TOP_HEIGHT - INNER_GAP)
+	leftBottom.Position = UDim2.new(0, 0, 0, LEFT_TOP_HEIGHT + INNER_GAP)
+	leftBottom.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	leftBottom.BackgroundTransparency = 0.75
+	leftBottom.Parent = holder
+	Instance.new("UICorner", leftBottom).CornerRadius = UDim.new(0, S(45))
+	addStroke(leftBottom)
+	
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, S(15))
+	layout.Parent = leftBottom
+	
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, S(25))
+	padding.PaddingLeft = UDim.new(0, S(15))
+	padding.PaddingRight = UDim.new(0, S(15))
+	padding.Parent = leftBottom
+	
+	---------------------------------------------------
+	-- CONTENT
+	---------------------------------------------------
+	
+	local OwnerGui = Instance.new("Frame")
+	OwnerGui.Size = UDim2.new(0, OWNER_WIDTH, 0, HEIGHT)
+	OwnerGui.Position = UDim2.new(0, LEFT_WIDTH + GAP, 0, 0)
+	OwnerGui.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	OwnerGui.BackgroundTransparency = 0.75
+	OwnerGui.Parent = holder
+	Instance.new("UICorner", OwnerGui).CornerRadius = UDim.new(0, S(45))
+	addStroke(OwnerGui)
+	
+	local Pages = Instance.new("Folder")
+	Pages.Parent = OwnerGui
+	
+	---------------------------------------------------
+	-- TAB FUNCTION
+	---------------------------------------------------
+	
+	function Window:CreateTab(tabName)
+		local Tab = {}
+		
+		local tabFrame = Instance.new("Frame")
+		tabFrame.Size = UDim2.new(1, 0, 0, S(80))
+		tabFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+		tabFrame.BackgroundTransparency = 0.85
+		tabFrame.Parent = leftBottom
+		Instance.new("UICorner", tabFrame).CornerRadius = UDim.new(0, S(25))
+		addStroke(tabFrame, 1.5, 0.5)
+		
+		local button = Instance.new("TextButton")
+		button.Size = UDim2.new(1,0,1,0)
+		button.BackgroundTransparency = 1
+		button.Text = tabName
+		button.TextColor3 = Color3.fromRGB(255,255,255)
+		button.TextScaled = true
+		button.FontFace = InterFont
+		button.Parent = tabFrame
+		
+		local Page = Instance.new("Frame")
+		Page.Size = UDim2.new(1, 0, 1, 0)
+		Page.BackgroundTransparency = 1
+		Page.Visible = false
+		Page.Parent = Pages
+		
+		local pageLayout = Instance.new("UIListLayout")
+		pageLayout.Padding = UDim.new(0, S(20))
+		pageLayout.Parent = Page
+		
+		local padding = Instance.new("UIPadding")
+		padding.PaddingTop = UDim.new(0, S(40))
+		padding.PaddingLeft = UDim.new(0, S(40))
+		padding.Parent = Page
+		
+		button.MouseButton1Click:Connect(function()
+			for _,v in ipairs(Pages:GetChildren()) do
+				if v:IsA("Frame") then
+					v.Visible = false
+				end
+			end
+			Page.Visible = true
+		end)
+		
+		---------------------------------------------------
+		-- TOGGLE ELEMENT
+		---------------------------------------------------
+		
+		function Tab:CreateToggle(text, callback)
+			local enabled = false
+			
+			local toggle = Instance.new("Frame")
+			toggle.Size = UDim2.new(0, S(200), 0, S(46))
+			toggle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+			toggle.BackgroundTransparency = 0.8
+			toggle.Parent = Page
+			Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+			addStroke(toggle)
+			
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(0.6, 0, 1, 0)
+			label.BackgroundTransparency = 1
+			label.Text = text
+			label.TextColor3 = Color3.fromRGB(255,255,255)
+			label.TextScaled = true
+			label.FontFace = InterFont
+			label.Parent = toggle
+			
+			local circle = Instance.new("Frame")
+			circle.Size = UDim2.new(0, S(36), 0, S(36))
+			circle.Position = UDim2.new(1, -S(41), 0.5, -S(18))
+			circle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+			circle.Parent = toggle
+			Instance.new("UICorner", circle).CornerRadius = UDim.new(1,0)
+			
+			toggle.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					enabled = not enabled
+					
+					if enabled then
+						TweenService:Create(circle, TweenInfo.new(0.25),
+							{Position = UDim2.new(1, -S(41), 0.5, -S(18))}):Play()
+					else
+						TweenService:Create(circle, TweenInfo.new(0.25),
+							{Position = UDim2.new(0.6, 0, 0.5, -S(18))}):Play()
+					end
+					
+					if callback then
+						callback(enabled)
+					end
+				end
+			end)
+		end
+		
+		return Tab
+	end
+	
+	---------------------------------------------------
+	-- OPEN / CLOSE
+	---------------------------------------------------
+	
+	local opened = false
+	
+	UserInputService.InputBegan:Connect(function(input, gpe)
+		if gpe then return end
+		
+		if input.KeyCode == Enum.KeyCode.RightControl then
+			opened = not opened
+			
+			if opened then
+				holder.Visible = true
+				TweenService:Create(uiScale, TweenInfo.new(0.35),
+					{Scale = 1}):Play()
+				TweenService:Create(blur, TweenInfo.new(0.35),
+					{Size = 18}):Play()
+			else
+				TweenService:Create(uiScale, TweenInfo.new(0.25),
+					{Scale = 0}):Play()
+				TweenService:Create(blur, TweenInfo.new(0.25),
+					{Size = 0}):Play()
+				task.wait(0.25)
+				holder.Visible = false
+			end
+		end
+	end)
+	
+	return Window
+end
+
+return LiquidUI
