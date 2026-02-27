@@ -1,53 +1,44 @@
---// LIQUID GLASS UI LIB - FULL VERSION
+--// PURE WHITE LIQUID UI
 
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
-local LiquidUI = {}
-LiquidUI.__index = LiquidUI
+local UI = {}
+UI.__index = UI
 
-local MAIN_STROKE_COLOR = Color3.fromRGB(0,170,255)
-
---// CREATE WINDOW
-function LiquidUI:CreateWindow(title, version)
+function UI:CreateWindow(title, version)
 
 	local Player = Players.LocalPlayer
 	
 	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "LiquidUI"
 	ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 	ScreenGui.ResetOnSpawn = false
 	
-	-- Main Frame
+	-- MAIN WINDOW
 	local Main = Instance.new("Frame", ScreenGui)
 	Main.Size = UDim2.new(0,650,0,400)
 	Main.Position = UDim2.new(0.5,-325,0.5,-200)
-	Main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	Main.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Main.BackgroundTransparency = 0.05
 	Main.BorderSizePixel = 0
 	
-	local UICorner = Instance.new("UICorner", Main)
-	UICorner.CornerRadius = UDim.new(0,18)
+	local Corner = Instance.new("UICorner", Main)
+	Corner.CornerRadius = UDim.new(0,20)
 	
-	local Stroke = Instance.new("UIStroke", Main)
-	Stroke.Color = MAIN_STROKE_COLOR
-	Stroke.Thickness = 2
-	
-	-- LEFT TAB PANEL
+	-- LEFT PANEL (TABS)
 	local LeftPanel = Instance.new("Frame", Main)
 	LeftPanel.Size = UDim2.new(0,160,1,0)
 	LeftPanel.BackgroundTransparency = 1
 	
-	local UIListLayout = Instance.new("UIListLayout", LeftPanel)
-	UIListLayout.Padding = UDim.new(0,6)
+	local TabLayout = Instance.new("UIListLayout", LeftPanel)
+	TabLayout.Padding = UDim.new(0,6)
 	
-	-- CONTENT
+	-- CONTENT AREA
 	local Content = Instance.new("Frame", Main)
 	Content.Size = UDim2.new(1,-160,1,0)
 	Content.Position = UDim2.new(0,160,0,0)
 	Content.BackgroundTransparency = 1
-	
-	local Tabs = {}
 	
 	-- OPEN/CLOSE
 	UIS.InputBegan:Connect(function(input,gp)
@@ -56,24 +47,22 @@ function LiquidUI:CreateWindow(title, version)
 		end
 	end)
 	
-	-- WATERMARK (Dynamic Island)
+	-- WATERMARK (White Island)
 	local Watermark = Instance.new("Frame", ScreenGui)
 	Watermark.Size = UDim2.new(0,220,0,40)
 	Watermark.Position = UDim2.new(0.5,-110,0,-60)
-	Watermark.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	Watermark.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Watermark.BackgroundTransparency = 0.03
 	Watermark.BorderSizePixel = 0
 	
 	local WCorner = Instance.new("UICorner", Watermark)
 	WCorner.CornerRadius = UDim.new(1,0)
 	
-	local WStroke = Instance.new("UIStroke", Watermark)
-	WStroke.Color = MAIN_STROKE_COLOR
-	
 	local WText = Instance.new("TextLabel", Watermark)
 	WText.Size = UDim2.new(1,0,1,0)
 	WText.BackgroundTransparency = 1
 	WText.Text = title.." | "..version
-	WText.TextColor3 = Color3.fromRGB(255,255,255)
+	WText.TextColor3 = Color3.fromRGB(80,80,80)
 	WText.Font = Enum.Font.GothamBold
 	WText.TextScaled = true
 	
@@ -81,14 +70,15 @@ function LiquidUI:CreateWindow(title, version)
 		Position = UDim2.new(0.5,-110,0,20)
 	}):Play()
 	
-	-- CREATE TAB
+	local Tabs = {}
+	
 	function Tabs:CreateTab(name)
 		
 		local TabButton = Instance.new("TextButton", LeftPanel)
 		TabButton.Size = UDim2.new(1,-10,0,35)
 		TabButton.Text = name
-		TabButton.BackgroundColor3 = Color3.fromRGB(35,35,35)
-		TabButton.TextColor3 = Color3.fromRGB(255,255,255)
+		TabButton.BackgroundColor3 = Color3.fromRGB(245,245,245)
+		TabButton.TextColor3 = Color3.fromRGB(90,90,90)
 		TabButton.Font = Enum.Font.Gotham
 		TabButton.TextScaled = true
 		TabButton.BorderSizePixel = 0
@@ -96,42 +86,42 @@ function LiquidUI:CreateWindow(title, version)
 		local BtnCorner = Instance.new("UICorner", TabButton)
 		BtnCorner.CornerRadius = UDim.new(0,10)
 		
-		-- Page
+		-- PAGE
 		local Page = Instance.new("Frame", Content)
 		Page.Size = UDim2.new(1,0,1,0)
 		Page.Visible = false
 		Page.BackgroundTransparency = 1
 		
-		-- Divider Line
+		-- DIVIDER
 		local Divider = Instance.new("Frame", Page)
-		Divider.Size = UDim2.new(0,2,1,0)
-		Divider.Position = UDim2.new(0.5,-1,0,0)
-		Divider.BackgroundColor3 = MAIN_STROKE_COLOR
+		Divider.Size = UDim2.new(0,1,1,0)
+		Divider.Position = UDim2.new(0.5,0,0,0)
+		Divider.BackgroundColor3 = Color3.fromRGB(230,230,230)
 		Divider.BorderSizePixel = 0
 		
-		-- Left Scroll
+		-- LEFT SCROLL
 		local Left = Instance.new("ScrollingFrame", Page)
 		Left.Size = UDim2.new(0.5,-10,1,-10)
 		Left.Position = UDim2.new(0,5,0,5)
 		Left.CanvasSize = UDim2.new(0,0,0,0)
-		Left.ScrollBarThickness = 4
+		Left.ScrollBarThickness = 3
 		Left.BackgroundTransparency = 1
 		Left.BorderSizePixel = 0
-		Left.ScrollBarImageColor3 = MAIN_STROKE_COLOR
+		Left.ScrollBarImageColor3 = Color3.fromRGB(220,220,220)
 		
-		local LeftLayout = Instance.new("UIListLayout", Left)
-		LeftLayout.Padding = UDim.new(0,6)
+		local Layout = Instance.new("UIListLayout", Left)
+		Layout.Padding = UDim.new(0,6)
 		
-		LeftLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			Left.CanvasSize = UDim2.new(0,0,0,LeftLayout.AbsoluteContentSize.Y+10)
+		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			Left.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y+10)
 		end)
 		
-		-- Right Scroll
+		-- RIGHT SCROLL
 		local Right = Left:Clone()
 		Right.Parent = Page
 		Right.Position = UDim2.new(0.5,5,0,5)
 		
-		-- TAB SWITCH
+		-- SWITCH TAB
 		TabButton.MouseButton1Click:Connect(function()
 			for _,v in pairs(Content:GetChildren()) do
 				if v:IsA("Frame") then
@@ -141,7 +131,7 @@ function LiquidUI:CreateWindow(title, version)
 			Page.Visible = true
 		end)
 		
-		-- TOGGLE FUNCTION
+		-- TOGGLE
 		local function CreateToggle(parent,text,callback)
 			local State = false
 			
@@ -153,32 +143,20 @@ function LiquidUI:CreateWindow(title, version)
 			Label.Size = UDim2.new(0.7,0,1,0)
 			Label.BackgroundTransparency = 1
 			Label.Text = text
-			Label.TextColor3 = Color3.fromRGB(255,255,255)
+			Label.TextColor3 = Color3.fromRGB(90,90,90)
 			Label.TextScaled = true
 			Label.Font = Enum.Font.Gotham
 			
 			local Toggle = Instance.new("Frame", Holder)
 			Toggle.Size = UDim2.new(0,50,0,22)
 			Toggle.Position = UDim2.new(1,-60,0.5,-11)
-			Toggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+			Toggle.BackgroundColor3 = Color3.fromRGB(240,240,240)
 			Toggle.BorderSizePixel = 0
-
-			-- Decorative End Circle (конец линии)
-			local EndCircle = Instance.new("Frame", Toggle)
-			EndCircle.Size = UDim2.new(0,6,0,6)
-			EndCircle.AnchorPoint = Vector2.new(0.5,0.5)
-			EndCircle.Position = UDim2.new(1,-3,0.5,0)
-			EndCircle.BackgroundColor3 = MAIN_STROKE_COLOR
-			EndCircle.BorderSizePixel = 0
-			
-			local EndCorner = Instance.new("UICorner", EndCircle)
-			EndCorner.CornerRadius = UDim.new(1,0)
-			
 			Instance.new("UICorner",Toggle).CornerRadius = UDim.new(1,0)
 			
 			local Fill = Instance.new("Frame", Toggle)
 			Fill.Size = UDim2.new(0,0,1,0)
-			Fill.BackgroundColor3 = MAIN_STROKE_COLOR
+			Fill.BackgroundColor3 = Color3.fromRGB(220,220,220)
 			Fill.BorderSizePixel = 0
 			Instance.new("UICorner",Fill).CornerRadius = UDim.new(1,0)
 			
@@ -189,6 +167,14 @@ function LiquidUI:CreateWindow(title, version)
 			Circle.BorderSizePixel = 0
 			Instance.new("UICorner",Circle).CornerRadius = UDim.new(1,0)
 			
+			local EndCircle = Instance.new("Frame", Toggle)
+			EndCircle.Size = UDim2.new(0,6,0,6)
+			EndCircle.AnchorPoint = Vector2.new(0.5,0.5)
+			EndCircle.Position = UDim2.new(1,-4,0.5,0)
+			EndCircle.BackgroundColor3 = Color3.fromRGB(220,220,220)
+			EndCircle.BorderSizePixel = 0
+			Instance.new("UICorner",EndCircle).CornerRadius = UDim.new(1,0)
+			
 			local Btn = Instance.new("TextButton",Toggle)
 			Btn.Size = UDim2.new(1,0,1,0)
 			Btn.Text = ""
@@ -198,80 +184,24 @@ function LiquidUI:CreateWindow(title, version)
 				State = not State
 				
 				if State then
-					TweenService:Create(Fill,TweenInfo.new(0.25),{Size=UDim2.new(1,0,1,0)}):Play()
-					TweenService:Create(Circle,TweenInfo.new(0.25),{Position=UDim2.new(1,-20,0.5,-9)}):Play()
+					TweenService:Create(Fill,TweenInfo.new(0.25),{
+						Size = UDim2.new(1,0,1,0)
+					}):Play()
+					
+					TweenService:Create(Circle,TweenInfo.new(0.25),{
+						Position = UDim2.new(1,-20,0.5,-9)
+					}):Play()
 				else
-					TweenService:Create(Fill,TweenInfo.new(0.25),{Size=UDim2.new(0,0,1,0)}):Play()
-					TweenService:Create(Circle,TweenInfo.new(0.25),{Position=UDim2.new(0,2,0.5,-9)}):Play()
+					TweenService:Create(Fill,TweenInfo.new(0.25),{
+						Size = UDim2.new(0,0,1,0)
+					}):Play()
+					
+					TweenService:Create(Circle,TweenInfo.new(0.25),{
+						Position = UDim2.new(0,2,0.5,-9)
+					}):Play()
 				end
 				
 				callback(State)
-			end)
-		end
-		
-		-- SLIDER FUNCTION
-		local function CreateSlider(parent,text,min,max,default,callback)
-			local Value = default or min
-			
-			local Holder = Instance.new("Frame", parent)
-			Holder.Size = UDim2.new(1,-10,0,50)
-			Holder.BackgroundTransparency = 1
-			
-			local Label = Instance.new("TextLabel", Holder)
-			Label.Size = UDim2.new(1,0,0.4,0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text.." : "..Value
-			Label.TextColor3 = Color3.fromRGB(255,255,255)
-			Label.TextScaled = true
-			Label.Font = Enum.Font.Gotham
-			
-			local Bar = Instance.new("Frame", Holder)
-			Bar.Size = UDim2.new(1,-20,0,6)
-			Bar.Position = UDim2.new(0,10,0.65,0)
-			Bar.BackgroundColor3 = Color3.fromRGB(60,60,60)
-			Bar.BorderSizePixel = 0
-			Instance.new("UICorner",Bar).CornerRadius = UDim.new(1,0)
-			
-			local Fill = Instance.new("Frame", Bar)
-			Fill.Size = UDim2.new((Value-min)/(max-min),0,1,0)
-			Fill.BackgroundColor3 = MAIN_STROKE_COLOR
-			Fill.BorderSizePixel = 0
-			Instance.new("UICorner",Fill).CornerRadius = UDim.new(1,0)
-			
-			local Circle = Instance.new("Frame", Bar)
-			Circle.Size = UDim2.new(0,14,0,14)
-			Circle.AnchorPoint = Vector2.new(0.5,0.5)
-			Circle.Position = UDim2.new((Value-min)/(max-min),0,0.5,0)
-			Circle.BackgroundColor3 = Color3.fromRGB(255,255,255)
-			Circle.BorderSizePixel = 0
-			Instance.new("UICorner",Circle).CornerRadius = UDim.new(1,0)
-			
-			local Dragging = false
-			
-			Circle.InputBegan:Connect(function(i)
-				if i.UserInputType==Enum.UserInputType.MouseButton1 then
-					Dragging=true
-				end
-			end)
-			
-			UIS.InputEnded:Connect(function(i)
-				if i.UserInputType==Enum.UserInputType.MouseButton1 then
-					Dragging=false
-				end
-			end)
-			
-			UIS.InputChanged:Connect(function(i)
-				if Dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-					local size=(i.Position.X-Bar.AbsolutePosition.X)/Bar.AbsoluteSize.X
-					size=math.clamp(size,0,1)
-					
-					Value=math.floor(min+(max-min)*size)
-					Fill.Size=UDim2.new(size,0,1,0)
-					Circle.Position=UDim2.new(size,0,0.5,0)
-					Label.Text=text.." : "..Value
-					
-					callback(Value)
-				end
 			end)
 		end
 		
@@ -281,12 +211,6 @@ function LiquidUI:CreateWindow(title, version)
 			end,
 			AddRightToggle = function(_,text,callback)
 				CreateToggle(Right,text,callback)
-			end,
-			AddLeftSlider = function(_,text,min,max,default,callback)
-				CreateSlider(Left,text,min,max,default,callback)
-			end,
-			AddRightSlider = function(_,text,min,max,default,callback)
-				CreateSlider(Right,text,min,max,default,callback)
 			end
 		}
 	end
@@ -294,4 +218,4 @@ function LiquidUI:CreateWindow(title, version)
 	return Tabs
 end
 
-return LiquidUI
+return UI
