@@ -1,221 +1,390 @@
---// PURE WHITE LIQUID UI
+--// Liquid Glass UI Library v4
+local LiquidUI = {}
+LiquidUI.__index = LiquidUI
 
-local TweenService = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
+--// Services
 local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
-local UI = {}
-UI.__index = UI
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-function UI:CreateWindow(title, version)
-
-	local Player = Players.LocalPlayer
-	
-	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-	ScreenGui.ResetOnSpawn = false
-	
-	-- MAIN WINDOW
-	local Main = Instance.new("Frame", ScreenGui)
-	Main.Size = UDim2.new(0,650,0,400)
-	Main.Position = UDim2.new(0.5,-325,0.5,-200)
-	Main.BackgroundColor3 = Color3.fromRGB(255,255,255)
-	Main.BackgroundTransparency = 0.05
-	Main.BorderSizePixel = 0
-	
-	local Corner = Instance.new("UICorner", Main)
-	Corner.CornerRadius = UDim.new(0,20)
-	
-	-- LEFT PANEL (TABS)
-	local LeftPanel = Instance.new("Frame", Main)
-	LeftPanel.Size = UDim2.new(0,160,1,0)
-	LeftPanel.BackgroundTransparency = 1
-	
-	local TabLayout = Instance.new("UIListLayout", LeftPanel)
-	TabLayout.Padding = UDim.new(0,6)
-	
-	-- CONTENT AREA
-	local Content = Instance.new("Frame", Main)
-	Content.Size = UDim2.new(1,-160,1,0)
-	Content.Position = UDim2.new(0,160,0,0)
-	Content.BackgroundTransparency = 1
-	
-	-- OPEN/CLOSE
-	UIS.InputBegan:Connect(function(input,gp)
-		if input.KeyCode == Enum.KeyCode.RightControl and not gp then
-			Main.Visible = not Main.Visible
-		end
-	end)
-	
-	-- WATERMARK (White Island)
-	local Watermark = Instance.new("Frame", ScreenGui)
-	Watermark.Size = UDim2.new(0,220,0,40)
-	Watermark.Position = UDim2.new(0.5,-110,0,-60)
-	Watermark.BackgroundColor3 = Color3.fromRGB(255,255,255)
-	Watermark.BackgroundTransparency = 0.03
-	Watermark.BorderSizePixel = 0
-	
-	local WCorner = Instance.new("UICorner", Watermark)
-	WCorner.CornerRadius = UDim.new(1,0)
-	
-	local WText = Instance.new("TextLabel", Watermark)
-	WText.Size = UDim2.new(1,0,1,0)
-	WText.BackgroundTransparency = 1
-	WText.Text = title.." | "..version
-	WText.TextColor3 = Color3.fromRGB(80,80,80)
-	WText.Font = Enum.Font.GothamBold
-	WText.TextScaled = true
-	
-	TweenService:Create(Watermark,TweenInfo.new(0.6,Enum.EasingStyle.Quint),{
-		Position = UDim2.new(0.5,-110,0,20)
-	}):Play()
-	
-	local Tabs = {}
-	
-	function Tabs:CreateTab(name)
-		
-		local TabButton = Instance.new("TextButton", LeftPanel)
-		TabButton.Size = UDim2.new(1,-10,0,35)
-		TabButton.Text = name
-		TabButton.BackgroundColor3 = Color3.fromRGB(245,245,245)
-		TabButton.TextColor3 = Color3.fromRGB(90,90,90)
-		TabButton.Font = Enum.Font.Gotham
-		TabButton.TextScaled = true
-		TabButton.BorderSizePixel = 0
-		
-		local BtnCorner = Instance.new("UICorner", TabButton)
-		BtnCorner.CornerRadius = UDim.new(0,10)
-		
-		-- PAGE
-		local Page = Instance.new("Frame", Content)
-		Page.Size = UDim2.new(1,0,1,0)
-		Page.Visible = false
-		Page.BackgroundTransparency = 1
-		
-		-- DIVIDER
-		local Divider = Instance.new("Frame", Page)
-		Divider.Size = UDim2.new(0,1,1,0)
-		Divider.Position = UDim2.new(0.5,0,0,0)
-		Divider.BackgroundColor3 = Color3.fromRGB(230,230,230)
-		Divider.BorderSizePixel = 0
-		
-		-- LEFT SCROLL
-		local Left = Instance.new("ScrollingFrame", Page)
-		Left.Size = UDim2.new(0.5,-10,1,-10)
-		Left.Position = UDim2.new(0,5,0,5)
-		Left.CanvasSize = UDim2.new(0,0,0,0)
-		Left.ScrollBarThickness = 3
-		Left.BackgroundTransparency = 1
-		Left.BorderSizePixel = 0
-		Left.ScrollBarImageColor3 = Color3.fromRGB(220,220,220)
-		
-		local Layout = Instance.new("UIListLayout", Left)
-		Layout.Padding = UDim.new(0,6)
-		
-		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			Left.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y+10)
-		end)
-		
-		-- RIGHT SCROLL
-		local Right = Left:Clone()
-		Right.Parent = Page
-		Right.Position = UDim2.new(0.5,5,0,5)
-		
-		-- SWITCH TAB
-		TabButton.MouseButton1Click:Connect(function()
-			for _,v in pairs(Content:GetChildren()) do
-				if v:IsA("Frame") then
-					v.Visible = false
-				end
-			end
-			Page.Visible = true
-		end)
-		
-		-- TOGGLE
-		local function CreateToggle(parent,text,callback)
-			local State = false
-			
-			local Holder = Instance.new("Frame", parent)
-			Holder.Size = UDim2.new(1,-10,0,40)
-			Holder.BackgroundTransparency = 1
-			
-			local Label = Instance.new("TextLabel", Holder)
-			Label.Size = UDim2.new(0.7,0,1,0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.TextColor3 = Color3.fromRGB(90,90,90)
-			Label.TextScaled = true
-			Label.Font = Enum.Font.Gotham
-			
-			local Toggle = Instance.new("Frame", Holder)
-			Toggle.Size = UDim2.new(0,50,0,22)
-			Toggle.Position = UDim2.new(1,-60,0.5,-11)
-			Toggle.BackgroundColor3 = Color3.fromRGB(240,240,240)
-			Toggle.BorderSizePixel = 0
-			Instance.new("UICorner",Toggle).CornerRadius = UDim.new(1,0)
-			
-			local Fill = Instance.new("Frame", Toggle)
-			Fill.Size = UDim2.new(0,0,1,0)
-			Fill.BackgroundColor3 = Color3.fromRGB(220,220,220)
-			Fill.BorderSizePixel = 0
-			Instance.new("UICorner",Fill).CornerRadius = UDim.new(1,0)
-			
-			local Circle = Instance.new("Frame", Toggle)
-			Circle.Size = UDim2.new(0,18,0,18)
-			Circle.Position = UDim2.new(0,2,0.5,-9)
-			Circle.BackgroundColor3 = Color3.fromRGB(255,255,255)
-			Circle.BorderSizePixel = 0
-			Instance.new("UICorner",Circle).CornerRadius = UDim.new(1,0)
-			
-			local EndCircle = Instance.new("Frame", Toggle)
-			EndCircle.Size = UDim2.new(0,6,0,6)
-			EndCircle.AnchorPoint = Vector2.new(0.5,0.5)
-			EndCircle.Position = UDim2.new(1,-4,0.5,0)
-			EndCircle.BackgroundColor3 = Color3.fromRGB(220,220,220)
-			EndCircle.BorderSizePixel = 0
-			Instance.new("UICorner",EndCircle).CornerRadius = UDim.new(1,0)
-			
-			local Btn = Instance.new("TextButton",Toggle)
-			Btn.Size = UDim2.new(1,0,1,0)
-			Btn.Text = ""
-			Btn.BackgroundTransparency = 1
-			
-			Btn.MouseButton1Click:Connect(function()
-				State = not State
-				
-				if State then
-					TweenService:Create(Fill,TweenInfo.new(0.25),{
-						Size = UDim2.new(1,0,1,0)
-					}):Play()
-					
-					TweenService:Create(Circle,TweenInfo.new(0.25),{
-						Position = UDim2.new(1,-20,0.5,-9)
-					}):Play()
-				else
-					TweenService:Create(Fill,TweenInfo.new(0.25),{
-						Size = UDim2.new(0,0,1,0)
-					}):Play()
-					
-					TweenService:Create(Circle,TweenInfo.new(0.25),{
-						Position = UDim2.new(0,2,0.5,-9)
-					}):Play()
-				end
-				
-				callback(State)
-			end)
-		end
-		
-		return {
-			AddLeftToggle = function(_,text,callback)
-				CreateToggle(Left,text,callback)
-			end,
-			AddRightToggle = function(_,text,callback)
-				CreateToggle(Right,text,callback)
-			end
-		}
-	end
-	
-	return Tabs
+-- Clean
+if playerGui:FindFirstChild("LiquidUI") then
+	playerGui.LiquidUI:Destroy()
 end
 
-return UI
+---------------------------------------------------
+-- SETTINGS
+---------------------------------------------------
+
+local STROKE_COLOR = Color3.fromRGB(255,255,255)
+
+local SCALE = 1.5
+local function S(v)
+	return math.floor(v / SCALE)
+end
+
+local InterFont = Font.new("rbxassetid://12187365364")
+
+local function addStroke(obj, thickness, transparency)
+	local s = Instance.new("UIStroke")
+	s.Color = STROKE_COLOR
+	s.Thickness = thickness or 1.5
+	s.Transparency = transparency or 0.4
+	s.Parent = obj
+end
+
+---------------------------------------------------
+-- WINDOW
+---------------------------------------------------
+
+function LiquidUI:CreateWindow(titleText, versionText)
+
+	local blur = Lighting:FindFirstChild("LiquidBlur") or Instance.new("BlurEffect")
+	blur.Name = "LiquidBlur"
+	blur.Size = 0
+	blur.Parent = Lighting
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "LiquidUI"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.Parent = playerGui
+
+	local HEIGHT = S(720)
+	local LEFT_WIDTH = S(250)
+	local OWNER_WIDTH = S(1000)
+	local GAP = S(25)
+
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(0, LEFT_WIDTH + GAP + OWNER_WIDTH, 0, HEIGHT)
+	holder.Position = UDim2.new(0.5,0,0.5,0)
+	holder.AnchorPoint = Vector2.new(0.5,0.5)
+	holder.BackgroundTransparency = 1
+	holder.Parent = gui
+	holder.Visible = false
+
+	local uiScale = Instance.new("UIScale")
+	uiScale.Scale = 0
+	uiScale.Parent = holder
+
+	---------------------------------------------------
+	-- WATERMARK (Dynamic Island)
+	---------------------------------------------------
+
+	local islandGui = Instance.new("ScreenGui", playerGui)
+	islandGui.Name = "LiquidIsland"
+
+	local island = Instance.new("Frame")
+	island.Size = UDim2.new(0,S(400),0,S(60))
+	island.Position = UDim2.new(0.5,0,0,-100)
+	island.AnchorPoint = Vector2.new(0.5,0)
+	island.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	island.BackgroundTransparency = 0.75
+	island.Parent = islandGui
+	Instance.new("UICorner", island).CornerRadius = UDim.new(1,0)
+	addStroke(island,1.5,0.3)
+
+	local islandText = Instance.new("TextLabel")
+	islandText.Size = UDim2.new(1,0,1,0)
+	islandText.BackgroundTransparency = 1
+	islandText.TextColor3 = Color3.new(1,1,1)
+	islandText.TextScaled = true
+	islandText.FontFace = InterFont
+	islandText.Parent = island
+
+	---------------------------------------------------
+	-- LEFT PANEL
+	---------------------------------------------------
+
+	local leftPanel = Instance.new("Frame")
+	leftPanel.Size = UDim2.new(0, LEFT_WIDTH, 1, 0)
+	leftPanel.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	leftPanel.BackgroundTransparency = 0.75
+	leftPanel.Parent = holder
+	Instance.new("UICorner", leftPanel).CornerRadius = UDim.new(0,S(45))
+	addStroke(leftPanel)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1,0,0,S(120))
+	title.BackgroundTransparency = 1
+	title.Text = titleText .. "\n" .. versionText
+	title.TextScaled = true
+	title.TextColor3 = Color3.new(1,1,1)
+	title.FontFace = InterFont
+	title.Parent = leftPanel
+
+	local tabsScroll = Instance.new("ScrollingFrame")
+	tabsScroll.Size = UDim2.new(1,-S(20),1,-S(140))
+	tabsScroll.Position = UDim2.new(0,S(10),0,S(130))
+	tabsScroll.BackgroundTransparency = 1
+	tabsScroll.Parent = leftPanel
+
+	local tabsLayout = Instance.new("UIListLayout", tabsScroll)
+	tabsLayout.Padding = UDim.new(0,S(15))
+
+	tabsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		tabsScroll.CanvasSize = UDim2.new(0,0,0,tabsLayout.AbsoluteContentSize.Y + 10)
+	end)
+
+	---------------------------------------------------
+	-- OWNER PANEL
+	---------------------------------------------------
+
+	local owner = Instance.new("Frame")
+	owner.Size = UDim2.new(0, OWNER_WIDTH, 1, 0)
+	owner.Position = UDim2.new(0, LEFT_WIDTH + GAP, 0, 0)
+	owner.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	owner.BackgroundTransparency = 0.75
+	owner.Parent = holder
+	Instance.new("UICorner", owner).CornerRadius = UDim.new(0,S(45))
+	addStroke(owner)
+
+	-- FULL HEIGHT DIVIDER (NO STROKE)
+	local divider = Instance.new("Frame")
+	divider.Size = UDim2.new(0,2,1,0)
+	divider.Position = UDim2.new(0.5,-1,0,0)
+	divider.BackgroundColor3 = STROKE_COLOR
+	divider.BackgroundTransparency = 0.5
+	divider.Parent = owner
+
+	local pagesFolder = Instance.new("Folder", owner)
+	local currentPage
+
+	---------------------------------------------------
+	-- TAB SYSTEM
+	---------------------------------------------------
+
+	local Window = {}
+
+	function Window:SetWatermark(text)
+		islandText.Text = text
+	end
+
+	function Window:ShowWatermark(time)
+		TweenService:Create(island,TweenInfo.new(0.4),
+			{Position = UDim2.new(0.5,0,0,S(20))}):Play()
+
+		task.delay(time or 2,function()
+			TweenService:Create(island,TweenInfo.new(0.4),
+				{Position = UDim2.new(0.5,0,0,-100)}):Play()
+		end)
+	end
+
+	function Window:CreateTab(tabName)
+
+		local Tab = {}
+
+		local tabButton = Instance.new("TextButton")
+		tabButton.Size = UDim2.new(1,0,0,S(60))
+		tabButton.BackgroundColor3 = Color3.fromRGB(255,255,255)
+		tabButton.BackgroundTransparency = 0.85
+		tabButton.Text = tabName
+		tabButton.TextScaled = true
+		tabButton.TextColor3 = Color3.new(1,1,1)
+		tabButton.FontFace = InterFont
+		tabButton.Parent = tabsScroll
+		Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0,S(25))
+		addStroke(tabButton,1.5,0.5)
+
+		local page = Instance.new("Frame")
+		page.Size = UDim2.new(1,0,1,0)
+		page.BackgroundTransparency = 1
+		page.Visible = false
+		page.Parent = pagesFolder
+
+		local function createScroll(pos)
+			local scroll = Instance.new("ScrollingFrame", page)
+			scroll.Size = UDim2.new(0.5,-S(20),1,-S(40))
+			scroll.Position = pos
+			scroll.BackgroundTransparency = 1
+
+			local layout = Instance.new("UIListLayout", scroll)
+			layout.Padding = UDim.new(0,S(20))
+
+			layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+				scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 20)
+			end)
+
+			return scroll
+		end
+
+		local leftScroll = createScroll(UDim2.new(0,S(20),0,S(20)))
+		local rightScroll = createScroll(UDim2.new(0.5,S(10),0,S(20)))
+
+		tabButton.MouseButton1Click:Connect(function()
+			if currentPage then
+				currentPage.Visible = false
+			end
+			page.Visible = true
+			currentPage = page
+		end)
+
+		---------------------------------------------------
+		-- TOGGLE
+		---------------------------------------------------
+
+		local function createToggle(parent,text,callback)
+			local enabled = false
+
+			local container = Instance.new("Frame")
+			container.Size = UDim2.new(1,0,0,S(60))
+			container.BackgroundTransparency = 1
+			container.Parent = parent
+
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(0.7,0,1,0)
+			label.BackgroundTransparency = 1
+			label.Text = text
+			label.TextScaled = true
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.TextColor3 = Color3.new(1,1,1)
+			label.FontFace = InterFont
+			label.Parent = container
+
+			local toggle = Instance.new("Frame")
+			toggle.Size = UDim2.new(0,S(100),0,S(40))
+			toggle.Position = UDim2.new(1,-S(110),0.5,-S(20))
+			toggle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+			toggle.BackgroundTransparency = 0.8
+			toggle.Parent = container
+			Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+			addStroke(toggle)
+
+			local circle = Instance.new("Frame")
+			circle.Size = UDim2.new(0,S(32),0,S(32))
+			circle.Position = UDim2.new(0,S(4),0.5,-S(16))
+			circle.BackgroundColor3 = Color3.new(1,1,1)
+			circle.Parent = toggle
+			Instance.new("UICorner", circle).CornerRadius = UDim.new(1,0)
+
+			toggle.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					enabled = not enabled
+
+					local newPos = enabled and UDim2.new(1,-S(36),0.5,-S(16))
+						or UDim2.new(0,S(4),0.5,-S(16))
+
+					TweenService:Create(circle,TweenInfo.new(0.25),{Position=newPos}):Play()
+
+					if callback then
+						callback(enabled)
+					end
+				end
+			end)
+		end
+
+		---------------------------------------------------
+		-- SLIDER
+		---------------------------------------------------
+
+		local function createSlider(parent,text,min,max,default,callback)
+
+			local value = default or min
+
+			local container = Instance.new("Frame")
+			container.Size = UDim2.new(1,0,0,S(70))
+			container.BackgroundTransparency = 1
+			container.Parent = parent
+
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(1,0,0.4,0)
+			label.BackgroundTransparency = 1
+			label.Text = text .. " : " .. value
+			label.TextScaled = true
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.TextColor3 = Color3.new(1,1,1)
+			label.FontFace = InterFont
+			label.Parent = container
+
+			local bar = Instance.new("Frame")
+			bar.Size = UDim2.new(1,0,0,S(10))
+			bar.Position = UDim2.new(0,0,0.65,0)
+			bar.BackgroundColor3 = Color3.fromRGB(255,255,255)
+			bar.BackgroundTransparency = 0.7
+			bar.Parent = container
+			Instance.new("UICorner", bar).CornerRadius = UDim.new(1,0)
+
+			local fill = Instance.new("Frame")
+			fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
+			fill.BackgroundColor3 = STROKE_COLOR
+			fill.Parent = bar
+			Instance.new("UICorner", fill).CornerRadius = UDim.new(1,0)
+
+			bar.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					local move
+					move = UserInputService.InputChanged:Connect(function(i)
+						if i.UserInputType == Enum.UserInputType.MouseMovement then
+							local percent = math.clamp(
+								(i.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X,
+								0,1)
+
+							value = math.floor(min + (max-min)*percent)
+							fill.Size = UDim2.new(percent,0,1,0)
+							label.Text = text .. " : " .. value
+
+							if callback then
+								callback(value)
+							end
+						end
+					end)
+
+					UserInputService.InputEnded:Connect(function(i)
+						if i.UserInputType == Enum.UserInputType.MouseButton1 then
+							move:Disconnect()
+						end
+					end)
+				end
+			end)
+		end
+
+		function Tab:AddLeftToggle(text,callback)
+			createToggle(leftScroll,text,callback)
+		end
+
+		function Tab:AddRightToggle(text,callback)
+			createToggle(rightScroll,text,callback)
+		end
+
+		function Tab:AddLeftSlider(text,min,max,default,callback)
+			createSlider(leftScroll,text,min,max,default,callback)
+		end
+
+		function Tab:AddRightSlider(text,min,max,default,callback)
+			createSlider(rightScroll,text,min,max,default,callback)
+		end
+
+		return Tab
+	end
+
+	---------------------------------------------------
+	-- OPEN / CLOSE
+	---------------------------------------------------
+
+	local opened = false
+
+	UserInputService.InputBegan:Connect(function(input,gpe)
+		if gpe then return end
+		if input.KeyCode == Enum.KeyCode.RightControl then
+			opened = not opened
+			if opened then
+				holder.Visible = true
+				TweenService:Create(uiScale,TweenInfo.new(0.35),{Scale=1}):Play()
+				TweenService:Create(blur,TweenInfo.new(0.35),{Size=18}):Play()
+			else
+				TweenService:Create(uiScale,TweenInfo.new(0.25),{Scale=0}):Play()
+				TweenService:Create(blur,TweenInfo.new(0.25),{Size=0}):Play()
+				task.wait(0.25)
+				holder.Visible = false
+			end
+		end
+	end)
+
+	return Window
+end
+
+return LiquidUI
