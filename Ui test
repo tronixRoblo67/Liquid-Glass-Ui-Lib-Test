@@ -162,6 +162,17 @@ function LiquidUI:CreateWindow(title, version)
 			Toggle.Position = UDim2.new(1,-60,0.5,-11)
 			Toggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
 			Toggle.BorderSizePixel = 0
+
+			-- Decorative End Circle (конец линии)
+			local EndCircle = Instance.new("Frame", Toggle)
+			EndCircle.Size = UDim2.new(0,6,0,6)
+			EndCircle.AnchorPoint = Vector2.new(0.5,0.5)
+			EndCircle.Position = UDim2.new(1,-3,0.5,0)
+			EndCircle.BackgroundColor3 = MAIN_STROKE_COLOR
+			EndCircle.BorderSizePixel = 0
+			
+			local EndCorner = Instance.new("UICorner", EndCircle)
+			EndCorner.CornerRadius = UDim.new(1,0)
 			
 			Instance.new("UICorner",Toggle).CornerRadius = UDim.new(1,0)
 			
